@@ -1,13 +1,22 @@
 # COS226_hashtables
 
-Reflection: 
+## Reflection: Hash Function Performance Analysis
 
-A written reflection that discusses how well each of your 5 hash function methods
-worked
-• Analyze the statistics you collected for each approach
-• Compare the performance of your different hash function approaches
-• Discuss which methods were most effective and why
+**Attempt 1 - Poor Hash + High Load**: poor_hash produced 14,798 collisions with linked list and 110M+ with linear probing. High load factor (0.9080) and weak hash function caused severe clustering.
 
+**Attempt 2 - Polynomial Hash + High Load**: polynomial_hash improved to 6,814 collisions (linked list) and 77-108k (linear probing). Better distribution but still affected by high load factor.
+
+**Attempt 3 - FNV-1a + High Load**: FNV-1a similar to polynomial_hash (~6,880 linked list, ~70-110k probing). Shows that hash function quality alone cannot overcome high load factor problems.
+
+**Attempt 4 - FNV-1a + Lower Load**: Lowering load factor to 0.3333 reduced collisions to 5,017 (linked list) and 3,885-10,553 (probing). Load factor has more impact than hash function choice.
+
+**Attempt 5 - FNV-1a + Lower Load + Double Hashing**: Best results with 4,715 (linked list) and 2,431-7,252 (probing) collisions. Double hashing further reduces clustering.
+
+**Key Findings**:
+- Load factor matters more than hash function quality
+- Linked list chaining consistently better than linear probing
+- Better hash functions reduce collisions but cannot fix clustering at high load
+- Combining better hash + lower load + double hashing minimizes collisions most effectively
 
 
 Attempt 1 - Poor hash + high load factor
