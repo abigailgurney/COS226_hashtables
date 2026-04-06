@@ -11,30 +11,31 @@ import time
 # Date: 10/11/2024
 
 
-#Attempt 4: FNV-1a hash + lower load factor
+#Attempt 5: FNV-1a + lower load + double hashing
 # What was tried:
 # - Used fnv1a_hash function for the movie title and quote keys
-# - Increased table size to lower the load factor
-# - Compared linked list chaining vs linear probing collision handling
+# - Increased table size to lower the load factor even more
+# - Enabled double hashing for linear probing and compared to linked list chaining
 # Why this approach:
 # - FNV-1a gives a stronger distribution test than polynomial_hash
-# - Lower load factor reduces crowding and should reduce collisions
-# - This shows how each collision strategy behaves when more space is available
-# Results (15,000 movie records, table size 45,007):
-# - Linked list (title): 5,017 collisions, ~0.031s construction
-# - Linked list (quote): 2,359 collisions, ~0.061s construction
-# - Linear probing (title): 10,553 collisions, ~0.031s construction
-# - Linear probing (quote): 3,885 collisions, ~0.043s construction
+# - Lower load factor plus double hashing should reduce probing collisions
+# - This shows how much probing improves when clustering pressure is reduced
+# Results (15,000 movie records, table size 60,013):
+# - Linked list (title): 4,715 collisions, ~0.030s construction
+# - Linked list (quote): 1,857 collisions, ~0.050s construction
+# - Linear probing (title): 7,252 collisions, ~0.038s construction
+# - Linear probing (quote): 2,431 collisions, ~0.064s construction
 # Key findings:
-# - Lowering the load factor significantly reduced collisions for both strategies
+# - Lower load and double hashing reduced probing collisions compared to earlier runs
 # - Linked list chaining still had fewer collisions than probing
 # - The combined console table makes the final results easier to compare
-# - FNV-1a performed better when the table had more open space
-# - This attempt gives a clear contrast against the high-load runs
+# - FNV-1a performed best when the table had more open space
+# - This attempt gives a clear contrast against higher-load configurations
 
 
 
 def load_movie_data(file_path):
+    # Load CSV file and parse all movie records.
     records = []
     with open(file_path, newline="", encoding="utf-8") as file_handle:
         reader = csv.DictReader(file_handle)
@@ -46,6 +47,7 @@ def load_movie_data(file_path):
 
 
 def parse_movie_record(raw_line):
+    # Parse a single movie record from CSV row data.
     if raw_line is None:
         return None
 
@@ -84,12 +86,14 @@ def parse_movie_record(raw_line):
 
 
 def normalize_movie_title(movie_title):
+    # structure title for consistent hashing (lowercase, no extra spaces).
     if isinstance(movie_title, dict):
         movie_title = movie_title.get("movie_title", "")
     return " ".join((movie_title or "").strip().lower().split())
 
 
 def normalize_movie_quote(movie_quote):
+    # structure quote for consistent hashing (lowercase, no extra spaces).
     if isinstance(movie_quote, dict):
         movie_quote = movie_quote.get("quote", "")
     return " ".join((movie_quote or "").strip().lower().split())
@@ -103,6 +107,7 @@ def poor_hash(key, table_size):
 
 
 def polynomial_hash(key, table_size, base=31):
+    # Rolling polynomial hash for better key distribution.
     value = 0
     for character in key:
         value = (value * base + ord(character)) % table_size
@@ -110,6 +115,7 @@ def polynomial_hash(key, table_size, base=31):
 
 
 def fnv1a_hash(key, table_size):
+    # FNV-1a hash for strong bit mixing and collision resistance.
     value = 2166136261
     for character in key:
         value ^= ord(character)
@@ -128,6 +134,7 @@ def secondary_hash(key, table_size):
 
 
 def is_prime(number):
+    # Check if a number is prime (for table size selection).
     if number < 2:
         return False
     if number in (2, 3):
@@ -142,6 +149,7 @@ def is_prime(number):
 
 
 def next_prime(number):
+    # Find the next prime number (used for hash table sizing).
     candidate = max(2, int(math.ceil(number)))
     while not is_prime(candidate):
         candidate += 1
@@ -149,6 +157,7 @@ def next_prime(number):
 
 
 def build_linked_list_hash_table(records, key_function, hash_function, table_size):
+    # Build hash table using linked list chaining for collision resolution.
     buckets = [[] for _ in range(table_size)]
     collisions = 0
 
@@ -170,6 +179,7 @@ def build_linked_list_hash_table(records, key_function, hash_function, table_siz
 
 
 def build_linear_probing_hash_table(records, key_function, hash_function, table_size, use_double_hashing=False):
+    # Build hash table using linear/double probing for collision fix.
     slots = [None] * table_size
     collisions = 0
 
@@ -191,6 +201,7 @@ def build_linear_probing_hash_table(records, key_function, hash_function, table_
 
 
 def count_wasted_space(hash_table):
+    # Count empty slots/buckets to measure table utilization.
     if "buckets" in hash_table:
         return sum(1 for bucket in hash_table["buckets"] if not bucket)
     if "slots" in hash_table:
@@ -199,10 +210,12 @@ def count_wasted_space(hash_table):
 
 
 def count_collisions(hash_table):
+    # get total collision count from hash table results.
     return hash_table.get("collisions", 0)
 
 
 def measure_construction_time(builder_function, records, key_function, *builder_args, **builder_kwargs):
+    # get how long it takes to build a hash table.
     start_time = time.perf_counter()
     hash_table = builder_function(records, key_function, *builder_args, **builder_kwargs)
     elapsed_time = time.perf_counter() - start_time
@@ -210,6 +223,7 @@ def measure_construction_time(builder_function, records, key_function, *builder_
 
 
 def summarize_hash_table(hash_table, construction_time):
+    # get key statistics from a hash table for reporting.
     table_size = hash_table.get("table_size", 0)
     record_count = hash_table.get("record_count", 0)
     return {
@@ -223,6 +237,7 @@ def summarize_hash_table(hash_table, construction_time):
 
 
 def print_combined_console_table(attempt_label, rows):
+    # structure and print all results in a table.
     headers = ["Strategy", "Key", "Table Size", "Records", "Load", "Wasted", "Collisions", "Time (s)"]
     table_rows = []
     for row in rows:
@@ -260,6 +275,7 @@ def print_combined_console_table(attempt_label, rows):
 
 
 def run_single_attempt(movie_records, attempt_settings):
+    # Run one complete attempt with all strategy/key combinations.
     key_functions = [
         ("movie title", normalize_movie_title),
         ("movie quote", normalize_movie_quote),
@@ -296,6 +312,7 @@ def run_single_attempt(movie_records, attempt_settings):
 
 
 def run_hash_table_attempts(file_path):
+    # Execute all hash table benchmark attempts and output results.
     movie_records = load_movie_data(file_path)
     if not movie_records:
         print("No movie records were loaded.")
@@ -305,11 +322,12 @@ def run_hash_table_attempts(file_path):
 
 
     active_attempt = {
-        "label": "Attempt 4 - FNV-1a hash + lower load factor",
+        "label": "Attempt 5 - FNV-1a + lower load + double hashing",
         "hash_function": fnv1a_hash,
-        "table_size": next_prime(record_count * 3),
-        "use_double_hashing": False,
+        "table_size": next_prime(record_count * 4),
+        "use_double_hashing": True,
     }
+
 
     run_single_attempt(movie_records, active_attempt)
 

@@ -43,3 +43,12 @@ linked list    | movie title | 45007      | 15000   | 0.3333 | 35024  | 5017    
 linked list    | movie quote | 45007      | 15000   | 0.3333 | 32366  | 2359       | 0.062701
 linear probing | movie title | 45007      | 15000   | 0.3333 | 30007  | 10553      | 0.031673
 linear probing | movie quote | 45007      | 15000   | 0.3333 | 30007  | 3885       | 0.047124
+
+
+Attempt 5 - FNV-1a + lower load + double hashing
+Strategy       | Key         | Table Size | Records | Load   | Wasted | Collisions | Time (s)
+---------------+-------------+------------+---------+--------+--------+------------+---------
+linked list    | movie title | 60013      | 15000   | 0.2499 | 49728  | 4715       | 0.032956
+linked list    | movie quote | 60013      | 15000   | 0.2499 | 46870  | 1857       | 0.049757
+linear probing | movie title | 60013      | 15000   | 0.2499 | 45013  | 7252       | 0.037849
+linear probing | movie quote | 60013      | 15000   | 0.2499 | 45013  | 2431       | 0.061851
