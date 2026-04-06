@@ -11,25 +11,26 @@ import time
 # Date: 10/11/2024
 
 
-#Attempt 2: Polynomial hash + high load factor
+#Attempt 3: FNV-1a hash + high load factor
 # What was tried:
-# - Used polynomial_hash function for the movie title and quote keys
+# - Used fnv1a_hash function for the movie title and quote keys
 # - Kept the table size close to the record count for a high load factor
 # - Compared linked list chaining vs linear probing collision handling
 # Why this approach:
+# - FNV-1a gives a stronger distribution test than polynomial_hash
 # - High load factor stresses both table designs under tight space
-# - This shows how each collision strategy behaves with a better hash
+# - This shows how each collision strategy behaves with a stronger hash
 # Results (15,000 movie records, table size 16,519):
-# - Linked list (title): 6,814 collisions, ~0.015s construction
-# - Linked list (quote): 5,167 collisions, ~0.019s construction
-# - Linear probing (title): 108,849 collisions, ~0.017s construction
-# - Linear probing (quote): 77,016 collisions, ~0.021s construction
+# - Linked list (title): 6,880 collisions, ~0.031s construction
+# - Linked list (quote): 5,174 collisions, ~0.047s construction
+# - Linear probing (title): 110,047 collisions, ~0.032s construction
+# - Linear probing (quote): 70,447 collisions, ~0.048s construction
 # Key findings:
-# - Linked list chaining still handled collisions better than probing
-# - Linear probing improved from the poor-hash run, but still had many collisions
+# - Linked list chaining still handled collisions much better than probing
+# - Linear probing still had far more collisions than chaining at high load
 # - The combined console table makes the final results easier to compare
-# - polynomial_hash is better than poor_hash, but high load still hurts performance
-# - This attempt gives a stronger comparison point for later improvements
+# - FNV-1a stayed in the same range as the other stronger hashes
+# - This attempt gives another comparison point for later improvements
 
 
 
@@ -304,8 +305,8 @@ def run_hash_table_attempts(file_path):
 
 
     active_attempt = {
-        "label": "Attempt 2 - Polynomial hash + high load factor",
-        "hash_function": polynomial_hash,
+        "label": "Attempt 3 - FNV-1a hash + high load factor",
+        "hash_function": fnv1a_hash,
         "table_size": next_prime(record_count * 1.1),
         "use_double_hashing": False,
     }
