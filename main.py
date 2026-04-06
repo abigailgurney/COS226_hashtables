@@ -11,57 +11,26 @@ import time
 # Date: 10/11/2024
 
 
-#Attempt 1: Benchmark poor hash with high load factor
+#Attempt 2: Polynomial hash + high load factor
 # What was tried:
-# - Used poor_hash function (based on key length + first/last character)
-# - High load factor strategy (load_factor = (record_count / table_size))
-# - Compared linked list vs collision 
+# - Used polynomial_hash function for the movie title and quote keys
+# - Kept the table size close to the record count for a high load factor
+# - Compared linked list chaining vs linear probing collision handling
 # Why this approach:
-# - Poor hash = baseline for collision behavior
-# - High load factor tests performance under constrained space
-# - worst-case scenario for optimization comparisons
+# - High load factor stresses both table designs under tight space
+# - This shows how each collision strategy behaves with a better hash
 # Results (15,000 movie records, table size 16,519):
-# - Linked list (title): 14,798 collisions, 0.007s construction
-# - Linked list (quote): 14,928 collisions, 0.006s construction
-# - Linear probing (title): 110.6M collisions, 2.96s construction
+# - Linked list (title): 6,814 collisions, ~0.015s construction
+# - Linked list (quote): 5,167 collisions, ~0.019s construction
+# - Linear probing (title): 108,849 collisions, ~0.017s construction
+# - Linear probing (quote): 77,016 collisions, ~0.021s construction
 # Key findings:
-# - Linked list hash tables handled collisions reasonably well
-# - Linear probing suffering
-# - high load factor, taking 400x longer than linked list
-# - Poor hash function creates highly uneven bucket distribution
-# - Established baseline for comparing optimization techniques
+# - Linked list chaining still handled collisions better than probing
+# - Linear probing improved from the poor-hash run, but still had many collisions
+# - The combined console table makes the final results easier to compare
+# - polynomial_hash is better than poor_hash, but high load still hurts performance
+# - This attempt gives a stronger comparison point for later improvements
 
-
-#Stats
-# Attempt 1 - Poor hash + high load factor
-# Attempt 1 - Poor hash + high load factor - linked list - movie title
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 16317
-#   collisions: 14798
-#   construction time: 0.007722 seconds
-# Attempt 1 - Poor hash + high load factor - linked list - movie quote
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 16447
-#   collisions: 14928
-#   construction time: 0.006311 seconds
-# Attempt 1 - Poor hash + high load factor - linear probing - movie title
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 1519
-#   collisions: 110637689
-#   construction time: 2.994424 seconds
-# Attempt 1 - Poor hash + high load factor - linear probing - movie quote
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 1519
-#   collisions: 111951273
-#   construction time: 2.934722 seconds
 
 
 def load_movie_data(file_path):
@@ -333,9 +302,10 @@ def run_hash_table_attempts(file_path):
 
     record_count = len(movie_records)
 
+
     active_attempt = {
-        "label": "Attempt 1 - Poor hash + high load factor",
-        "hash_function": poor_hash,
+        "label": "Attempt 2 - Polynomial hash + high load factor",
+        "hash_function": polynomial_hash,
         "table_size": next_prime(record_count * 1.1),
         "use_double_hashing": False,
     }
