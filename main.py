@@ -32,37 +32,6 @@ import time
 # - Established baseline for comparing optimization techniques
 
 
-#Stats
-# Attempt 1 - Poor hash + high load factor
-# Attempt 1 - Poor hash + high load factor - linked list - movie title
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 16317
-#   collisions: 14798
-#   construction time: 0.007722 seconds
-# Attempt 1 - Poor hash + high load factor - linked list - movie quote
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 16447
-#   collisions: 14928
-#   construction time: 0.006311 seconds
-# Attempt 1 - Poor hash + high load factor - linear probing - movie title
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 1519
-#   collisions: 110637689
-#   construction time: 2.994424 seconds
-# Attempt 1 - Poor hash + high load factor - linear probing - movie quote
-#   table size: 16519
-#   records stored: 15000
-#   load factor: 0.9080
-#   wasted space: 1519
-#   collisions: 111951273
-#   construction time: 2.934722 seconds
-
 
 def load_movie_data(file_path):
     records = []
