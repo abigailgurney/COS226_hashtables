@@ -32,6 +32,37 @@ import time
 # - Established baseline for comparing optimization techniques
 
 
+#Stats
+# Attempt 1 - Poor hash + high load factor
+# Attempt 1 - Poor hash + high load factor - linked list - movie title
+#   table size: 16519
+#   records stored: 15000
+#   load factor: 0.9080
+#   wasted space: 16317
+#   collisions: 14798
+#   construction time: 0.007722 seconds
+# Attempt 1 - Poor hash + high load factor - linked list - movie quote
+#   table size: 16519
+#   records stored: 15000
+#   load factor: 0.9080
+#   wasted space: 16447
+#   collisions: 14928
+#   construction time: 0.006311 seconds
+# Attempt 1 - Poor hash + high load factor - linear probing - movie title
+#   table size: 16519
+#   records stored: 15000
+#   load factor: 0.9080
+#   wasted space: 1519
+#   collisions: 110637689
+#   construction time: 2.994424 seconds
+# Attempt 1 - Poor hash + high load factor - linear probing - movie quote
+#   table size: 16519
+#   records stored: 15000
+#   load factor: 0.9080
+#   wasted space: 1519
+#   collisions: 111951273
+#   construction time: 2.934722 seconds
+
 
 def load_movie_data(file_path):
     records = []
@@ -208,20 +239,54 @@ def measure_construction_time(builder_function, records, key_function, *builder_
     return hash_table, elapsed_time
 
 
-def print_hash_table_statistics(table_name, hash_table, construction_time):
-    wasted_space = count_wasted_space(hash_table)
-    collisions = count_collisions(hash_table)
+def summarize_hash_table(hash_table, construction_time):
     table_size = hash_table.get("table_size", 0)
     record_count = hash_table.get("record_count", 0)
-    load_factor = (record_count / table_size) if table_size else 0
+    return {
+        "table_size": table_size,
+        "record_count": record_count,
+        "load_factor": (record_count / table_size) if table_size else 0,
+        "wasted_space": count_wasted_space(hash_table),
+        "collisions": count_collisions(hash_table),
+        "construction_time": construction_time,
+    }
 
-    print(table_name)
-    print(f"  table size: {table_size}")
-    print(f"  records stored: {record_count}")
-    print(f"  load factor: {load_factor:.4f}")
-    print(f"  wasted space: {wasted_space}")
-    print(f"  collisions: {collisions}")
-    print(f"  construction time: {construction_time:.6f} seconds")
+
+def print_combined_console_table(attempt_label, rows):
+    headers = ["Strategy", "Key", "Table Size", "Records", "Load", "Wasted", "Collisions", "Time (s)"]
+    table_rows = []
+    for row in rows:
+        table_rows.append(
+            [
+                row["strategy"],
+                row["key_label"],
+                str(row["table_size"]),
+                str(row["record_count"]),
+                f"{row['load_factor']:.4f}",
+                str(row["wasted_space"]),
+                str(row["collisions"]),
+                f"{row['construction_time']:.6f}",
+            ]
+        )
+
+    column_widths = []
+    for index, header in enumerate(headers):
+        max_width = len(header)
+        for row in table_rows:
+            max_width = max(max_width, len(row[index]))
+        column_widths.append(max_width)
+
+    def format_row(values):
+        return " | ".join(value.ljust(column_widths[index]) for index, value in enumerate(values))
+
+    divider = "-+-".join("-" * width for width in column_widths)
+
+    print(attempt_label)
+    print(format_row(headers))
+    print(divider)
+    for row in table_rows:
+        print(format_row(row))
+    print()
 
 
 def run_single_attempt(movie_records, attempt_settings):
@@ -235,10 +300,9 @@ def run_single_attempt(movie_records, attempt_settings):
         ("linear probing", build_linear_probing_hash_table),
     ]
 
-    print(attempt_settings["label"])
+    combined_rows = []
     for table_label, builder in table_builders:
         for key_label, key_function in key_functions:
-            table_name = f"{attempt_settings['label']} - {table_label} - {key_label}"
             builder_args = [attempt_settings["hash_function"], attempt_settings["table_size"]]
             if builder is build_linear_probing_hash_table:
                 builder_args.append(attempt_settings["use_double_hashing"])
@@ -249,8 +313,16 @@ def run_single_attempt(movie_records, attempt_settings):
                 key_function,
                 *builder_args,
             )
-            print_hash_table_statistics(table_name, hash_table, construction_time)
-    print()
+            summary = summarize_hash_table(hash_table, construction_time)
+            summary.update(
+                {
+                    "strategy": table_label,
+                    "key_label": key_label,
+                }
+            )
+            combined_rows.append(summary)
+
+    print_combined_console_table(attempt_settings["label"], combined_rows)
 
 
 def run_hash_table_attempts(file_path):
