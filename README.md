@@ -19,6 +19,10 @@
 - Combining better hash + lower load + double hashing minimizes collisions most effectively
 
 
+Intresting reading done along side assignment:
+https://mojoauth.com/compare-hashing-algorithms/fnv-1a-vs-dhash#what-is-fnv-1a
+https://codeforces.com/blog/entry/100027
+
 Attempt 1 - Poor hash + high load factor
 Strategy       | Key         | Table Size | Records | Load   | Wasted | Collisions | Time (s)
 ---------------+-------------+------------+---------+--------+--------+------------+---------
