@@ -36,3 +36,10 @@ linked list    | movie quote | 16519      | 15000   | 0.9080 | 6693   | 5174    
 linear probing | movie title | 16519      | 15000   | 0.9080 | 1519   | 110047     | 0.033703
 linear probing | movie quote | 16519      | 15000   | 0.9080 | 1519   | 70447      | 0.050449
 
+Attempt 4 - FNV-1a hash + lower load factor
+Strategy       | Key         | Table Size | Records | Load   | Wasted | Collisions | Time (s)
+---------------+-------------+------------+---------+--------+--------+------------+---------
+linked list    | movie title | 45007      | 15000   | 0.3333 | 35024  | 5017       | 0.032986
+linked list    | movie quote | 45007      | 15000   | 0.3333 | 32366  | 2359       | 0.062701
+linear probing | movie title | 45007      | 15000   | 0.3333 | 30007  | 10553      | 0.031673
+linear probing | movie quote | 45007      | 15000   | 0.3333 | 30007  | 3885       | 0.047124

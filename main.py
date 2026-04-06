@@ -11,26 +11,26 @@ import time
 # Date: 10/11/2024
 
 
-#Attempt 3: FNV-1a hash + high load factor
+#Attempt 4: FNV-1a hash + lower load factor
 # What was tried:
 # - Used fnv1a_hash function for the movie title and quote keys
-# - Kept the table size close to the record count for a high load factor
+# - Increased table size to lower the load factor
 # - Compared linked list chaining vs linear probing collision handling
 # Why this approach:
 # - FNV-1a gives a stronger distribution test than polynomial_hash
-# - High load factor stresses both table designs under tight space
-# - This shows how each collision strategy behaves with a stronger hash
-# Results (15,000 movie records, table size 16,519):
-# - Linked list (title): 6,880 collisions, ~0.031s construction
-# - Linked list (quote): 5,174 collisions, ~0.047s construction
-# - Linear probing (title): 110,047 collisions, ~0.032s construction
-# - Linear probing (quote): 70,447 collisions, ~0.048s construction
+# - Lower load factor reduces crowding and should reduce collisions
+# - This shows how each collision strategy behaves when more space is available
+# Results (15,000 movie records, table size 45,007):
+# - Linked list (title): 5,017 collisions, ~0.031s construction
+# - Linked list (quote): 2,359 collisions, ~0.061s construction
+# - Linear probing (title): 10,553 collisions, ~0.031s construction
+# - Linear probing (quote): 3,885 collisions, ~0.043s construction
 # Key findings:
-# - Linked list chaining still handled collisions much better than probing
-# - Linear probing still had far more collisions than chaining at high load
+# - Lowering the load factor significantly reduced collisions for both strategies
+# - Linked list chaining still had fewer collisions than probing
 # - The combined console table makes the final results easier to compare
-# - FNV-1a stayed in the same range as the other stronger hashes
-# - This attempt gives another comparison point for later improvements
+# - FNV-1a performed better when the table had more open space
+# - This attempt gives a clear contrast against the high-load runs
 
 
 
@@ -305,9 +305,9 @@ def run_hash_table_attempts(file_path):
 
 
     active_attempt = {
-        "label": "Attempt 3 - FNV-1a hash + high load factor",
+        "label": "Attempt 4 - FNV-1a hash + lower load factor",
         "hash_function": fnv1a_hash,
-        "table_size": next_prime(record_count * 1.1),
+        "table_size": next_prime(record_count * 3),
         "use_double_hashing": False,
     }
 
